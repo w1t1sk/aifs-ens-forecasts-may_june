@@ -1,0 +1,45 @@
+# Apptainer / Singularity container images
+*.sif
+*.simg
+
+# Docker archives
+*.tar
+
+# ERA5 initial-condition pickles (large binary data)
+*.pkl
+
+# Local data directories
+data/
+
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Slurm logs
+*.out
+*.err
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Editor
+.vscode/
+.idea/
+
+# Weather and Data formats
+*.nc
+*.zarr
+*.grib
+*.grb
+*.h5
+*.hdf5
+*.pt
+*.pth

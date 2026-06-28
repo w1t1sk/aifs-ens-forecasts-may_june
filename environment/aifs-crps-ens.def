@@ -1,0 +1,49 @@
+Bootstrap: docker-daemon
+From: aifs:latest
+Stage: build
+
+%post
+    # Update package lists and install build/geospatial tools
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        libproj-dev \
+        proj-data \
+        proj-bin
+
+    # Update pip to ensure it's not a bug in an old version
+    /usr/bin/python3 -m pip install --upgrade pip
+
+    # Install the required libraries for the CRPS model
+    echo "Installing specific CRPS model versions..."
+    /usr/bin/python3 -m pip install --no-cache-dir \
+        'torch==2.5.0' \
+        'anemoi-inference[huggingface]==0.6.0' \
+        'anemoi-models==0.6.0' \
+        'anemoi-graphs==0.6.0' \
+        'anemoi-datasets==0.5.23' \
+        'earthkit-regrid==0.4.0' \
+        'ecmwf-opendata>=0.3.19' \
+        'matplotlib' \
+        'cartopy'
+
+    # Clone FlashAttention
+    echo "Cloning FlashAttention..."
+    git clone https://github.com/Dao-AILab/flash-attention.git /opt/flash-attention
+    cd /opt/flash-attention
+    
+    # --- The New, Robust, Two-Step Build Process ---
+    # Step 1: Force the script to build a local .whl file. This will compile the code.
+    echo "Building FlashAttention wheel from source..."
+    /usr/bin/python3 setup.py bdist_wheel
+
+    # Step 2: Install directly from the .whl file we just created. This bypasses all download logic.
+    echo "Installing from local FlashAttention wheel..."
+    /usr/bin/python3 -m pip install --no-cache-dir dist/flash_attn-*.whl
+
+    # Clean up
+    echo "Cleaning up..."
+    cd /
+    rm -rf /opt/flash-attention
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
